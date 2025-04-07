@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Grammar Quest</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .title {
+            text-align: center;
+            color: #4a4a4a;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+        .mode-selection {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 40px 0;
+        }
+        .mode-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            width: 300px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+        .mode-card:hover {
+            transform: translateY(-5px);
+        }
+        .button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-top: 15px;
+        }
+        #gameArea {
+            display: none;
+        }
+        .story {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+        }
+        textarea {
+            width: 100%;
+            margin: 15px 0;
+            padding: 15px;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            min-height: 100px;
+        }
+        .feedback {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="modeSelection">
+            <h1 class="title">Grammar Quest</h1>
+            <p style="text-align: center;">Choose your learning mode:</p>
+            
+            <div class="mode-selection">
+                <div class="mode-card" onclick="startComputerMode()">
+                    <h2>🖥️ Computer Stories</h2>
+                    <p>Practice with our carefully crafted stories</p>
+                    <button class="button">Start Computer Mode</button>
+                </div>
+                
+                <div class="mode-card">
+                    <h2>📚 Upload Your Book</h2>
+                    <p>Learn with your favorite stories!</p>
+                    <input type="file" id="pdfUpload" accept=".pdf" style="display: none" 
+                           onchange="handleFileUpload(event)">
+                    <button class="button" onclick="document.getElementById('pdfUpload').click()">
+                        Upload PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="gameArea">
+            <h2 id="storyTitle"></h2>
+            <div class="story">
+                <p id="storyText"></p>
+                <textarea id="userCorrection" placeholder="Type your corrected version here..."></textarea>
+                <div id="feedback" class="feedback"></div>
+                <button class="button" onclick="checkAnswers()">Check Corrections</button>
+                <button class="button" onclick="nextStory()">Next Story</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let stories = [];
+        let currentStoryIndex = 0;
+        let score = 0;
+
+        async function startComputerMode() {
+            try {
+                const response = await fetch('http://localhost:5001/api/computer-stories');
+                const data = await response.json();
+                stories = data.stories;
+                startGame();
+            } catch (error) {
+                alert('Error loading stories. Please try again.');
+            }
+        }
+
+        async function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (!file.name.endsWith('.pdf')) {
+                alert('Please upload a PDF file');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('http://localhost:5001/api/upload-pdf', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+
+                stories = data.stories;
+                startGame();
+            } catch (error) {
+                alert('Error processing PDF. Please try again.');
+            }
+        }
+
+        function startGame() {
+            document.getElementById('modeSelection').style.display = 'none';
+            document.getElementById('gameArea').style.display = 'block';
+            showStory(0);
+        }
+
+        function showStory(index) {
+            if (index >= stories.length) {
+                alert(`Game Over! Final Score: ${score}`);
+                location.reload();
+                return;
+            }
+            const story = stories[index];
+            document.getElementById('storyTitle').textContent = story.title;
+            document.getElementById('storyText').textContent = story.text;
+            document.getElementById('userCorrection').value = story.text;
+            document.getElementById('feedback').style.display = 'none';
+        }
+
+        function checkAnswers() {
+            const userText = document.getElementById('userCorrection').value;
+            const story = stories[currentStoryIndex];
+            let correctCount = 0;
+
+            story.errors.forEach(error => {
+                if (!userText.includes(error.original) && userText.includes(error.corrected)) {
+                    correctCount++;
+                }
+            });
+
+            score += correctCount;
+            const feedback = document.getElementById('feedback');
+            feedback.textContent = `You found ${correctCount} out of ${story.errors.length} errors!`;
+            feedback.style.display = 'block';
+            feedback.style.background = correctCount === story.errors.length ? '#4CAF50' : '#ff9800';
+            feedback.style.color = 'white';
+        }
+
+        function nextStory() {
+            currentStoryIndex++;
+            showStory(currentStoryIndex);
+        }
+    </script>
+</body>
+</html>

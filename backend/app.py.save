@@ -1,0 +1,107 @@
+from flask import Flask, jsonify, send_from_directory, request
+from flask_cors import CORS
+import PyPDF2
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad, unpad
+from base64 import b64encode, b64decode
+
+app = Flask(__name__, static_folder='frontend')
+CORS(app)
+
+class SecurePDFHandler:
+    def __init__(self):
+        # Exactly 32 bytes key
+        self.key = b'ThisIsA32ByteLongSecureKey12345678'
+
+    def process_pdf(self, file):
+        try:
+            pdf_reader = PyPDF2.PdfReader(file)
+            text = ""
+            for page in pdf_reader.pages:
+                text += page.extract_text() + "\n"
+            return text
+        except Exception as e:
+            print(f"PDF processing error: {e}")
+            return None
+
+pdf_handler = SecurePDFHandler()
+
+# Computer-generated stories
+stories = [
+    {
+        "id": 1,
+        "level": 1,
+        "title": "The Park Day 🌳",
+        "text": "The children was playing in the park. They seen a beautiful bird in it's nest.",
+        "errors": [
+            {"original": "was", "corrected": "were"},
+            {"original": "seen", "corrected": "saw"},
+            {"original": "it's", "corrected": "its"}
+        ]
+    },
+    {
+        "id": 2,
+        "level": 2,
+        "title": "School Day 📚",
+        "text": "Every student have their own project. Neither John or Mary were finished yet.",
+        "errors": [
+            {"original": "have", "corrected": "has"},
+            {"original": "or", "corrected": "nor"},
+            {"original": "were", "corrected": "was"}
+        ]
+    }
+]
+
+@app.route('/')
+def index():
+    return send_from_directory(app.static_folder, 'index.html')
+
+@app.route('/api/computer-stories')
+def get_computer_stories():
+    return jsonify({"stories": stories})
+
+@app.route('/api/upload-pdf', methods=['POST'])
+def upload_pdf():
+    if 'file' not in request.files:
+        return jsonify({"error": "No file uploaded"}), 400
+        
+    file = request.files['file']
+    if not file.filename.endswith('.pdf'):
+        return jsonify({"error": "Please upload a PDF file"}), 400
+
+    try:
+        content = pdf_handler.process_pdf(file)
+        if not content:
+            return jsonify({"error": "Could not process PDF"}), 400
+
+        # Create stories from PDF content
+        pdf_stories = []
+        paragraphs = content.split('\n\n')
+        
+        for i, para in enumerate(paragraphs[:10]):  # Limit to 10 sections
+            if len(para.strip()) > 50:  # Only use longer paragraphs
+                pdf_stories.append({
+                    "id": len(pdf_stories) + 1,
+                    "level": len(pdf_stories) + 1,
+                    "title": f"Chapter {len(pdf_stories) + 1}",
+                    "text": para.strip()[:500],  # Limit text length
+                    "errors": [
+                        {"original": "was", "corrected": "were"},
+                        {"original": "their", "corrected": "there"},
+                        {"original": "its", "corrected": "it's"}
+                    ]
+                })
+        
+        return jsonify({"stories": pdf_stories})
+        
+    except Exception as e:
+        print(f"Error: {e}")
+        return jsonify({"error": "Error processing PDF"}), 500
+
+if __name__ == '__main__':
+    print("\n=== Grammar Quest Game ===")
+    print("1. Open http://localhost:5001 in your browser")
+    print("2. Choose between computer stories or upload PDF")
+    print("3. Press Ctrl+C to stop the server")
+    print("========================\n")
+    app.run(port=5001, debug=True)
