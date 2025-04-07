@@ -1,75 +1,109 @@
-# Grammar Quest 🎯
+📚 Grammar Quest - Interactive Grammar Learning Application
+Grammar Quest is an educational web application designed to help users improve their English grammar skills through fun and interactive exercises. It offers two modes:
+🔹 Computer Mode – Pre-defined grammar stories with errors
+🔹 Upload Mode – Allows users to upload their own PDFs and receive grammar practice from custom content.
 
-A fun, interactive game to practice English grammar through story-based exercises. Players identify and correct grammar errors in short stories, with helpful hints and immediate feedback.
+🚀 Key Features
+🖥️ Computer Mode
+Includes 5 levels of increasing difficulty.
 
-## 🌟 Features
+Each level contains grammar stories with 3 intentional errors.
 
-- **Interactive Stories**: Engaging short stories with common grammar errors
-- **Instant Feedback**: Real-time feedback on corrections
-- **Hint System**: Helpful hints when you're stuck
-- **Progress Tracking**: Visual progress bar and scoring system
-- **Solution Support**: Option to view correct answers for learning
-- **Modern UI**: Clean, responsive design with smooth animations
+Users identify and correct mistakes directly on the web interface.
 
-## 🚀 Quick Start
+Error types include:
 
-### Prerequisites
-- Python 3.x
-- Flask (`pip install flask`)
-- Flask-CORS (`pip install flask-cors`)
+Subject-verb agreement (e.g., was vs were)
 
-### Installation
+Contractions vs. possessives (e.g., its vs it's)
 
-1
-cd grammar-quest
-```
+Commonly confused words (their/there/they're) and more.
 
-2. Set up the Python virtual environment:
-```bash
-cd backend
-python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install flask flask-cors
-```
+📄 Upload Mode
+Users can upload their own PDF files.
 
-### Running the Game
+The app will scan and introduce 2–3 grammar errors per section.
 
-1. Start the server:
-```bash
-cd backend
-python3 app.py
-```
+Text layout and flow are preserved.
 
-2. Open your browser and visit:
-```
+Users can then practice identifying and correcting those errors.
 
-## 🎮 How to Play
+🛠️ Technical Setup
+Prerequisites
+Python 3.7 or higher
 
-1. Click "Start Your Adventure" on the landing page
-2. Read the story carefully
-3. Identify grammar errors in the text
-4. Type your corrected version in the text area
-5. Click "Check Corrections" to see your score
-6. Use "Show Hints" if you need help
-7. Use "Show Solution" to see the correct answers
-8. Click "Next Story" to continue
+Node.js and npm
 
-## 📚 Available Stories
+A virtual environment for Python (recommended)
 
-1. The Magic Garden 🌸
-2. Space Adventure 🚀
-3. The Lost Puppy 🐕
-4. Beach Day 🏖️
-5. The Smart Robot 🤖
+Project Architecture
+Backend: Built using Flask (Python), handles PDF processing and error generation.
 
-## 🎯 Grammar Topics Covered
+Frontend: Developed using React.js, manages the user interface and communicates with the backend.
 
-- Article Usage (a/an/the)
-- Subject-Verb Agreement
-- Possessive Forms
-- Past Tense Verbs
-- Homophones (their/there/they're)
-- Modal Verbs
-- Third Person Singular
+Folder Structure
+backend/: Contains the Flask server and logic for processing PDFs.
 
-## �� Project Structure
+frontend/: Contains the React front-end and user interface components.
+
+venv/: Python virtual environment setup.
+
+README.md: Documentation for the project.
+
+🌐 How to Use the Application
+Computer Mode
+Visit the homepage of the web application.
+
+Choose a level from 1 to 5.
+
+Read the story and find the grammar mistakes.
+
+Submit your corrections to get feedback.
+
+Upload Mode
+Prepare a PDF file with grammatically correct English text.
+
+Use the "Upload PDF" feature in the app.
+
+The app will process your PDF, add grammar errors, and present it as an interactive quiz.
+
+Find and fix the errors as part of your learning journey.
+
+🔄 API Overview
+GET /api/computer-stories: Fetches the pre-defined stories with grammar mistakes.
+
+POST /api/upload-pdf: Accepts user-uploaded PDFs and returns processed content with errors for correction.
+
+🧠 Grammar Concepts Practiced
+Subject-verb agreement
+
+Tense consistency
+
+Possessive forms
+
+Articles (a, an, the)
+
+Contractions
+
+Commonly confused words
+
+Pronoun use and consistency
+
+🧩 Troubleshooting Tips
+Backend
+Ensure Python 3.7+ is installed.
+
+Use a virtual environment and install the required dependencies.
+
+Check if the server is running on the correct port (5001).
+
+Frontend
+Make sure all npm packages are installed.
+
+If there are display issues, try clearing the cache or reinstalling node modules.
+
+Confirm the frontend is running on port 3000.
+
+👨‍💻 Developers & Contributors
+Grammar Quest was built by a team of passionate developers focused on enhancing grammar education through tech innovation. Contributions are always welcome!
+
